@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DN_IDC_2018B_Ex02
+namespace B18_Ex05_Damka_BL
 {
-    internal class Player
+    public class Player
     {
         private const int k_NumOfEmtyRowsAtBeginingOfTheGame = 2;
 
@@ -266,10 +266,14 @@ namespace DN_IDC_2018B_Ex02
 
         internal string GetRandomMovment(Board o_Board)
         {
+            string movment = null;
             this.BuildPlayerPossibleMovments(o_Board);
             Random random = new Random();
             int choosenIndex = random.Next(0, m_NumberMovementOppertunities);
-            string movment = m_PosibleMovesLocations[choosenIndex].Row.ToString() + m_PosibleMovesLocations[choosenIndex].Column.ToString() + ">" + m_PosibleMovesDestinations[choosenIndex].Row.ToString() + m_PosibleMovesDestinations[choosenIndex].Column.ToString();
+            if (this.m_NumberMovementOppertunities != 0)
+            {
+                movment = m_PosibleMovesLocations[choosenIndex].Row.ToString() + m_PosibleMovesLocations[choosenIndex].Column.ToString() + ">" + m_PosibleMovesDestinations[choosenIndex].Row.ToString() + m_PosibleMovesDestinations[choosenIndex].Column.ToString();
+            }
 
             return movment;
         }
@@ -280,20 +284,20 @@ namespace DN_IDC_2018B_Ex02
 
             foreach (Checkers current in CheckersArray)
             {
-                if (current.Group == Checkers.eCheckerGroup.O || current.Group == Checkers.eCheckerGroup.X) 
+                if (current.Group == Checkers.eCheckerGroup.O || current.Group == Checkers.eCheckerGroup.X)
                 {
                     gameScore++;
                 }
                 else if (current.Group == Checkers.eCheckerGroup.OKing || current.Group == Checkers.eCheckerGroup.XKing)
-                    {
-                        gameScore += 4;
-                    }
+                {
+                    gameScore += 4;
+                }
             }
 
             m_CurrentGameScore = gameScore;
         }
 
-        internal string Name
+        public string Name
         {
             get
             {
@@ -384,7 +388,7 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal int TotalScore
+        public int TotalScore
         {
             get
             {

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DN_IDC_2018B_Ex02
+namespace B18_Ex05_Damka_BL
 {
-    internal class Game
+    public class Game
     {
         internal enum eGameMode
         {
@@ -21,19 +21,30 @@ namespace DN_IDC_2018B_Ex02
         private bool m_Tie = false;
         private bool m_Quit = false;
         private string m_LastMovment;
+        private string m_WinnerName = null;
         private Player m_LastPlayerThatPlayed = null;
+        private bool m_isLastMoveWasEat = false;
+        private bool m_IsLastCheckerUpdatedToKing = false;
 
-        internal Game(int io_BoardSize, string io_FirstName, string io_SecondName, eGameMode i_GameMode)
+        public Game(int io_BoardSize, string io_FirstName, string io_SecondName, bool i_IsComputerMode)
         {
             m_FirstPlayer = new Player(io_BoardSize, Checkers.eCheckerGroup.X, io_FirstName);
             m_SecondPlayer = new Player(io_BoardSize, Checkers.eCheckerGroup.O, io_SecondName);
-            this.m_GameMode = i_GameMode;
+            if (i_IsComputerMode)
+            {
+                m_GameMode = eGameMode.SingleMode;
+            }
+            else
+            {
+                m_GameMode = eGameMode.MultiMode;
+            }
+
             m_Board = new Board(io_BoardSize);
             m_Board.BuildBoard(m_FirstPlayer, m_SecondPlayer);
             m_LastPlayerThatPlayed = m_FirstPlayer;
         }
 
-        internal Checkers.eCheckerGroup CurrentTurn
+        public Checkers.eCheckerGroup CurrentTurn
         {
             get
             {
@@ -49,6 +60,14 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
+        public string WinnerName
+        {
+            get
+            {
+                return m_WinnerName;
+            }
+        }
+
         internal eGameMode Mode
         {
             get
@@ -57,7 +76,7 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal bool IsGameEnd
+        public bool IsGameEnd
         {
             get
             {
@@ -65,7 +84,23 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal bool IsTie
+        public bool IsLastMoveWasEat
+        {
+            get
+            {
+                return m_isLastMoveWasEat;
+            }
+        }
+
+        public bool IsLastCheckerUpdatedToKing
+        {
+            get
+            {
+                return m_IsLastCheckerUpdatedToKing;
+            }
+        }
+
+        public bool IsTie
         {
             get
             {
@@ -73,7 +108,7 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal bool Quit
+        public bool Quit
         {
             get
             {
@@ -81,17 +116,17 @@ namespace DN_IDC_2018B_Ex02
             }
 
             set
-            { 
+            {
                 if (value == true)
                 {
                     UpdatePlayersScoreAtTheEndOfMatch();
                 }
 
-                 m_Quit = value;
+                m_Quit = value;
             }
         }
 
-        internal Board Board
+        public Board Board
         {
             get
             {
@@ -99,7 +134,7 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal Player FirstPlayer
+        public Player FirstPlayer
         {
             get
             {
@@ -115,20 +150,31 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal Player SecondtPlayer
+        public Player SecondtPlayer
         {
             get
             {
-                return m_SecondPlayer; 
+                return m_SecondPlayer;
             }
         }
 
         private bool isEndMatch()
         {
-            if (m_FirstPlayer.RemainCheckers == 0 || m_SecondPlayer.RemainCheckers == 0)
+            if (m_SecondPlayer.RemainCheckers == 0)
+            {
+                m_WinnerName = m_FirstPlayer.Name;
+                m_IsGameEnd = true;
+            }
+
+            if (m_FirstPlayer.RemainCheckers == 0)
+            {
+                m_WinnerName = m_SecondPlayer.Name;
+                m_IsGameEnd = true; 
+            }
+
+            if (m_IsGameEnd)
             {
                 UpdatePlayersScoreAtTheEndOfMatch();
-                m_IsGameEnd = true;
             }
 
             return m_IsGameEnd;
@@ -136,19 +182,18 @@ namespace DN_IDC_2018B_Ex02
 
         private void changeTurn()
         {
-            bool isLastMoveWasEat;
             if (!isEndMatch())
             {
                 if (m_CurrentTurn == Checkers.eCheckerGroup.O)
                 {
-                    isLastMoveWasEat = m_SecondPlayer.IsPossibleEat;
-                    if (isLastMoveWasEat)
+                    m_isLastMoveWasEat = m_SecondPlayer.IsPossibleEat;
+                    if (m_isLastMoveWasEat)
                     {
                         m_SecondPlayer.BuildPlayerPossibleMovments(m_Board);
                         deletePossibleMovmentExepctGivenMovment(m_SecondPlayer);
                     }
 
-                    if (m_SecondPlayer.NumberMovementOppertunities == 0 && !isLastMoveWasEat)
+                    if (m_SecondPlayer.NumberMovementOppertunities == 0 && !m_isLastMoveWasEat)
                     {
                         m_FirstPlayer.BuildPlayerPossibleMovments(m_Board);
                         if (m_FirstPlayer.NumberMovementOppertunities == 0)
@@ -163,7 +208,7 @@ namespace DN_IDC_2018B_Ex02
                         UpdatePlayersScoreAtTheEndOfMatch();
                     }
 
-                    if (!isLastMoveWasEat || !m_SecondPlayer.IsPossibleEat)
+                    if (!m_isLastMoveWasEat || !m_SecondPlayer.IsPossibleEat)
                     {
                         m_CurrentTurn = Checkers.eCheckerGroup.X;
                         m_LastPlayerThatPlayed = m_SecondPlayer;
@@ -171,15 +216,15 @@ namespace DN_IDC_2018B_Ex02
                 }
                 else
                 {
-                    isLastMoveWasEat = m_FirstPlayer.IsPossibleEat;
+                    m_isLastMoveWasEat = m_FirstPlayer.IsPossibleEat;
                     m_FirstPlayer.BuildPlayerPossibleMovments(m_Board);
-                    if (isLastMoveWasEat)
+                    if (m_isLastMoveWasEat)
                     {
                         m_FirstPlayer.BuildPlayerPossibleMovments(m_Board);
                         deletePossibleMovmentExepctGivenMovment(m_FirstPlayer);
                     }
 
-                    if (m_FirstPlayer.NumberMovementOppertunities == 0 && !isLastMoveWasEat)
+                    if (m_FirstPlayer.NumberMovementOppertunities == 0 && !m_isLastMoveWasEat)
                     {
                         m_SecondPlayer.BuildPlayerPossibleMovments(m_Board);
                         if (m_SecondPlayer.NumberMovementOppertunities == 0)
@@ -194,7 +239,7 @@ namespace DN_IDC_2018B_Ex02
                         UpdatePlayersScoreAtTheEndOfMatch();
                     }
 
-                    if (!isLastMoveWasEat || !m_FirstPlayer.IsPossibleEat)
+                    if (!m_isLastMoveWasEat || !m_FirstPlayer.IsPossibleEat)
                     {
                         m_CurrentTurn = Checkers.eCheckerGroup.O;
                         m_LastPlayerThatPlayed = m_FirstPlayer;
@@ -203,12 +248,12 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-        internal bool ConvertMovementFromStringToIntAndPlayMovmentIfPossibleMovement(string i_Movment)
+        public bool ConvertMovementFromStringToIntAndPlayMovmentIfPossibleMovement(string i_Movment)
         {
             Player currentPlayer;
             Player oppositePlayer;
 
-            if(m_CurrentTurn == Checkers.eCheckerGroup.O)
+            if (m_CurrentTurn == Checkers.eCheckerGroup.O)
             {
                 currentPlayer = SecondtPlayer;
                 oppositePlayer = FirstPlayer;
@@ -255,52 +300,59 @@ namespace DN_IDC_2018B_Ex02
 
         private void playMovment(int i_BeginningRow, int i_BeginningColumn, int i_DestinationgRow, int i_DestinationgColumn, Player i_CurrentPlayer, Player i_OppositePlayer)
         {
-                foreach (Checkers currentChecker in i_CurrentPlayer.CheckersArray)
+            foreach (Checkers currentChecker in i_CurrentPlayer.CheckersArray)
+            {
+                if (currentChecker.Row == i_BeginningRow && currentChecker.Column == i_BeginningColumn && currentChecker.Group != Checkers.eCheckerGroup.Empty)
                 {
-                    if (currentChecker.Row == i_BeginningRow && currentChecker.Column == i_BeginningColumn && currentChecker.Group != Checkers.eCheckerGroup.Empty)
-                    {
-                        currentChecker.Row = i_DestinationgRow;
-                        currentChecker.Column = i_DestinationgColumn;
-                        checkUpdateToKing(currentChecker, i_CurrentPlayer.BelongingGroup, i_DestinationgRow);
+                    currentChecker.Row = i_DestinationgRow;
+                    currentChecker.Column = i_DestinationgColumn;
+                    checkUpdateToKing(currentChecker, i_CurrentPlayer.BelongingGroup, i_DestinationgRow);
 
-                        if (i_CurrentPlayer.IsPossibleEat)
+                    if (i_CurrentPlayer.IsPossibleEat)
+                    {
+                        int rowToDelete = (i_BeginningRow + i_DestinationgRow) / 2;
+                        int columnToDelete = (i_BeginningColumn + i_DestinationgColumn) / 2;
+                        foreach (Checkers currentOppositeChecker in i_OppositePlayer.CheckersArray)
                         {
-                            int rowToDelete = (i_BeginningRow + i_DestinationgRow) / 2;
-                            int columnToDelete = (i_BeginningColumn + i_DestinationgColumn) / 2;
-                            foreach (Checkers currentOppositeChecker in i_OppositePlayer.CheckersArray)
+                            if (currentOppositeChecker.Column == columnToDelete && currentOppositeChecker.Row == rowToDelete && currentOppositeChecker.Group != Checkers.eCheckerGroup.Empty)
                             {
-                                if (currentOppositeChecker.Column == columnToDelete && currentOppositeChecker.Row == rowToDelete && currentOppositeChecker.Group != Checkers.eCheckerGroup.Empty)
-                                {
-                                    currentOppositeChecker.Group = Checkers.eCheckerGroup.Empty;
-                                    i_OppositePlayer.RemainCheckers--;
-                                    break;
-                                }
+                                currentOppositeChecker.Group = Checkers.eCheckerGroup.Empty;
+                                i_OppositePlayer.RemainCheckers--;
+                                break;
                             }
                         }
-
-                        m_Board.BuildBoard(m_FirstPlayer, m_SecondPlayer);
-                        changeTurn();
-                        break;
                     }
-                }  
+
+                    m_Board.BuildBoard(m_FirstPlayer, m_SecondPlayer);
+                    changeTurn();
+                    break;
+                }
+            }
         }
 
         public void RandomMovment()
         {
             string movement = SecondtPlayer.GetRandomMovment(m_Board);
-            playMovment(int.Parse(movement[0].ToString()), int.Parse(movement[1].ToString()), int.Parse(movement[3].ToString()), int.Parse(movement[4].ToString()), m_SecondPlayer, m_FirstPlayer);
-            m_LastMovment = Convert.ToChar(int.Parse(movement[1].ToString()) + 'A').ToString() + Convert.ToChar(int.Parse(movement[0].ToString()) + 'a').ToString() + ">" + Convert.ToChar(int.Parse(movement[4].ToString()) + 'A').ToString() + Convert.ToChar(int.Parse(movement[3].ToString()) + 'a').ToString();
+            if (movement != null)
+            {
+                m_LastMovment = Convert.ToChar(int.Parse(movement[1].ToString()) + 'A').ToString() + Convert.ToChar(int.Parse(movement[0].ToString()) + 'a').ToString() + ">" + Convert.ToChar(int.Parse(movement[4].ToString()) + 'A').ToString() + Convert.ToChar(int.Parse(movement[3].ToString()) + 'a').ToString();
+                playMovment(int.Parse(movement[0].ToString()), int.Parse(movement[1].ToString()), int.Parse(movement[3].ToString()), int.Parse(movement[4].ToString()), m_SecondPlayer, m_FirstPlayer);
+            }
         }
 
         private void checkUpdateToKing(Checkers currentChecker, Checkers.eCheckerGroup checkerGroup, int rowDestination)
         {
+            m_IsLastCheckerUpdatedToKing = false;
+
             if (Checkers.eCheckerGroup.O == checkerGroup && rowDestination == m_Board.BoardSize - 1)
             {
                 currentChecker.Group = Checkers.eCheckerGroup.OKing;
+                m_IsLastCheckerUpdatedToKing = true;
             }
             else if (Checkers.eCheckerGroup.X == checkerGroup && rowDestination == 0)
             {
                 currentChecker.Group = Checkers.eCheckerGroup.XKing;
+                m_IsLastCheckerUpdatedToKing = true;
             }
         }
 
@@ -364,7 +416,7 @@ namespace DN_IDC_2018B_Ex02
             }
         }
 
-       internal string GetCurrentPlayerName()
+        internal string GetCurrentPlayerName()
         {
             string playerName;
             switch (m_CurrentTurn)

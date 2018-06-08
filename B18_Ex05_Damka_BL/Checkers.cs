@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DN_IDC_2018B_Ex02
+namespace B18_Ex05_Damka_BL
 {
-    internal class Checkers
+    public class Checkers
     {
-        internal enum eCheckerGroup
+        public enum eCheckerGroup
         {
             O = 0,
             OKing = 1,
@@ -26,7 +26,7 @@ namespace DN_IDC_2018B_Ex02
             this.m_ColumnLocation = i_ColumnLocation;
         }
 
-        internal eCheckerGroup Group
+        public eCheckerGroup Group
         {
             get
             {
